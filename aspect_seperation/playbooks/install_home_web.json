@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Run container setup and then containers_setup",
+    "hosts": "all",
+    "gather_facts": true,
+
+    "vars": {
+      "containers": [ "home_web" ]
+    },
+
+    "tasks": [
+      {
+        "name": "Run container_install for {{ item }}",
+        "include_role": {
+          "name": "container_install"
+        },
+        "vars": {
+          "container": "{{ item }}"
+        },
+        "loop": "{{ containers }}"
+      },
+      {
+        "name": "Run containers_setup after all individual containers",
+        "include_role": {
+          "name": "containers_setup"
+        }
+      },
+      {
+        "name": "Run updater script for containers assigned to this host",
+        "command": "/opt/podman_updater/update_podman_containers.sh {{ item }}",
+        "loop": "{{ containers | default([]) }}",
+        "when": "(normal_containers is defined and item in normal_containers) or (ha_containers is defined and item in ha_containers)"
+      }
+    ]
+  }
+]

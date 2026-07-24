@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Run container setup role",
+    "hosts": "all",
+    "gather_facts": false,
+
+    "tasks": [
+      {
+        "name": "Include container setup tasks",
+        "include_role": {
+          "name": "containers_setup"
+        }
+      }
+    ]
+  }
+]

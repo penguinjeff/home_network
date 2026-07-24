@@ -1,0 +1,104 @@
+=== Active Zones ===
+VLAN2222
+  interfaces: br0.2222
+external
+  sources: 0.0.0.0/0
+minecraft
+  sources: 76.16.0.0/12 76.96.0.0/11 76.128.0.0/11 174.56.0.0/17 73.26.0.0/16 67.164.156.0/22 67.164.130.0/22 172.32.0.0/11
+public (default)
+  interfaces: br0 enp1s0 mvlan2222 mvlan10
+trusted
+  sources: 192.168.0.0/24 fd00:2222::/64 172.222.0.0/16 10.89.1.0/24 fd00:192::/64 10.89.0.0/24
+=== Zone Details ===
+
+=== Zone: [VLAN2222] [] ===
+VLAN2222 (active)
+  target: default
+  ingress-priority: 0
+  egress-priority: 0
+  icmp-block-inversion: no
+  interfaces: br0.2222
+  sources: 
+  services: http https vrrp
+  ports: 8282/tcp
+  protocols: 
+  forward: yes
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+=== Zone: [external] [] ===
+external (active)
+  target: default
+  ingress-priority: 0
+  egress-priority: 0
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 0.0.0.0/0
+  services: cockpit http https ntfy ssh
+  ports: 8123/tcp
+  protocols: 
+  forward: yes
+  masquerade: yes
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+=== Zone: [minecraft] [] ===
+minecraft (active)
+  target: default
+  ingress-priority: 0
+  egress-priority: 0
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 76.16.0.0/12 76.96.0.0/11 76.128.0.0/11 174.56.0.0/17 73.26.0.0/16 67.164.156.0/22 67.164.130.0/22 172.32.0.0/11
+  services: 
+  ports: 25565/tcp 19132/tcp 19132/udp
+  protocols: 
+  forward: no
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+=== Zone: [public] [(default)] ===
+public (default, active)
+  target: default
+  ingress-priority: 0
+  egress-priority: 0
+  icmp-block-inversion: no
+  interfaces: br0 enp1s0 mvlan10 mvlan2222
+  sources: 
+  services: cockpit dhcp dhcpv6 dhcpv6-client dns http https mdns ssh vrrp
+  ports: 8282/tcp
+  protocols: 
+  forward: yes
+  masquerade: yes
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+	rule family="ipv6" source address="fd00:2222::/64" masquerade
+
+=== Zone: [trusted] [] ===
+trusted (active)
+  target: ACCEPT
+  ingress-priority: 0
+  egress-priority: 0
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 192.168.0.0/24 fd00:2222::/64 172.222.0.0/16 10.89.1.0/24 fd00:192::/64 10.89.0.0/24
+  services: http https
+  ports: 
+  protocols: 
+  forward: yes
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+

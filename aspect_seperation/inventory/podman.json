@@ -1,0 +1,42 @@
+{
+  "containers": {
+    "vars": {
+      "has_containers": true,
+      "container_location": "/root/docker-compose-configs"
+    },
+    "hosts": {
+      "PodmanManager": {
+        "normal_containers": [
+          "jellyfin",
+          "unifi",
+          "pihole",
+          "minecraft",
+          "home_web"
+        ],
+        "ha_containers": [
+          "ntfy",
+          "pihole-ha",
+          "dhcp_dns",
+          "openvpn"
+        ],
+        "update_time": "03:17",
+        "cleanup_time": "03:30"
+      },
+      "garage": {
+        "normal_containers": [
+          "home_web",
+          "pihole",
+          "pihole-secondary"
+        ],
+        "ha_containers": [
+          "ntfy",
+          "pihole-ha",
+          "dhcp_dns",
+          "openvpn"
+        ],
+        "update_time": "03:47",
+        "cleanup_time": "04:00"
+      }
+    }
+  }
+}

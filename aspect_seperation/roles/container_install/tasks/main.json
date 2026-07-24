@@ -1,0 +1,97 @@
+[
+  {
+    "name": "Check if local container directory exists",
+    "stat": {
+      "path": "{{ lookup('env','HOME') }}/container_configs/{{ container }}"
+    },
+    "register": "container_dir",
+    "delegate_to": "localhost",
+    "run_once": true,
+    "when": "container is defined and container | length > 0"
+  },
+  {
+    "name": "Create container config and home directory",
+    "file": {
+      "path": "{{ lookup('env','HOME') }}/container_configs/{{ container }}/home",
+      "state": "directory",
+      "mode": "0755"
+    },
+    "delegate_to": "localhost",
+    "run_once": true,
+    "when": "container is defined and container | length > 0 and not container_dir.stat.exists"
+  },
+  {
+    "name": "Copy default docker-compose.yml if missing",
+    "copy": {
+      "src": "../../default_container_configs/{{ container }}/docker-compose.yml",
+      "dest": "{{ lookup('env','HOME') }}/container_configs/{{ container }}/docker-compose.yml",
+      "mode": "0644",
+      "force": false
+    },
+    "delegate_to": "localhost",
+    "run_once": true,
+    "when": "container is defined and container | length > 0 and not container_dir.stat.exists"
+  },
+  {
+    "name": "Copy default home directory contents if missing",
+    "copy": {
+      "src": "../../default_container_configs/{{ container }}/home/",
+      "dest": "{{ lookup('env','HOME') }}/container_configs/{{ container }}/home/",
+      "mode": "0644",
+      "force": false
+    },
+    "delegate_to": "localhost",
+    "run_once": true,
+    "when": "container is defined and container | length > 0 and not container_dir.stat.exists"
+  },
+  {
+    "name": "Copy default setup.sh if missing",
+    "copy": {
+      "src": "../../default_container_configs/{{ container }}/setup.sh",
+      "dest": "{{ lookup('env','HOME') }}/container_configs/{{ container }}/setup.sh",
+      "mode": "0755",
+      "force": false
+    },
+    "delegate_to": "localhost",
+    "run_once": true,
+    "when": "container is defined and container | length > 0 and not container_dir.stat.exists"
+  },
+  {
+    "name": "Ensure remote container runtime directory exists",
+    "file": {
+      "path": "{{ container_location }}/{{ container }}",
+      "state": "directory",
+      "mode": "0755"
+    },
+    "when": "(normal_containers is defined and container in normal_containers) or (ha_containers is defined and container in ha_containers)"
+  },
+  {
+    "name": "Ensure remote container home directory exists",
+    "file": {
+      "path": "/home/{{ container }}",
+      "state": "directory",
+      "mode": "0755"
+    },
+    "when": "(normal_containers is defined and container in normal_containers) or (ha_containers is defined and container in ha_containers)"
+  },
+  {
+    "name": "Copy docker-compose.yml to remote host",
+    "copy": {
+      "src": "{{ lookup('env','HOME') }}/container_configs/{{ container }}/docker-compose.yml",
+      "dest": "{{ container_location }}/{{ container }}/docker-compose.yml",
+      "mode": "0644",
+      "force": false
+    },
+    "when": "(normal_containers is defined and container in normal_containers) or (ha_containers is defined and container in ha_containers)"
+  },
+  {
+    "name": "Copy home directory to remote host",
+    "copy": {
+      "src": "{{ lookup('env','HOME') }}/container_configs/{{ container }}/home/",
+      "dest": "/home/{{ container }}/",
+      "mode": "0644",
+      "force": false
+    },
+    "when": "(normal_containers is defined and container in normal_containers) or (ha_containers is defined and container in ha_containers)"
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Loop test for directory existence",
+    "hosts": "all",
+    "gather_facts": false,
+
+    "tasks": [
+      {
+        "name": "Check if directory exists",
+        "stat": {
+          "path": "{{ container_location }}/{{ item }}"
+        },
+        "loop": "{{ normal_containers | default([]) }}",
+        "register": "dir_stats",
+        "when": "normal_containers is defined"
+      },
+      {
+        "name": "Debug only directories that exist",
+        "debug": {
+          "msg": "Directory {{ item.item }} EXISTS"
+        },
+        "loop": "{{ dir_stats.results | default([]) }}",
+        "when": "item.stat.exists"
+      }
+    ]
+  }
+]

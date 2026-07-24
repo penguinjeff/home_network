@@ -1,0 +1,69 @@
+[
+  {
+    "name": "Build VRRP routers",
+    "hosts": "vrrp_routers",
+    "become": true,
+    "tasks": [
+      {
+        "name": "Install keepalived and iptables",
+        "package": {
+          "name": [
+            "keepalived",
+            "iptables"
+          ],
+          "state": "present"
+        }
+      },
+
+      {
+        "name": "Enable IPv4 forwarding",
+        "ansible.posix.sysctl": {
+          "name": "net.ipv4.ip_forward",
+          "value": "1",
+          "state": "present",
+          "reload": true
+        }
+      },
+
+      {
+        "name": "Enable IPv6 forwarding (optional)",
+        "ansible.posix.sysctl": {
+          "name": "net.ipv6.conf.all.forwarding",
+          "value": "1",
+          "state": "present",
+          "reload": true
+        }
+      },
+      {
+        "name": "Ensure NAT for 172.222.0.0/16 is present",
+        "shell": "iptables -t nat -C POSTROUTING -s 172.222.0.0/16 -j MASQUERADE || iptables -t nat -A POSTROUTING -s 172.222.0.0/16 -j MASQUERADE"
+      },
+      {
+        "name": "Create keepalived config directory",
+        "file": {
+          "path": "/etc/keepalived",
+          "state": "directory",
+          "mode": "0755"
+        }
+      },
+
+      {
+        "name": "Deploy keepalived configuration",
+        "template": {
+          "src": "keepalived.conf.j2",
+          "dest": "/etc/keepalived/keepalived.conf",
+          "mode": "0644"
+        }
+      },
+
+      {
+        "name": "Enable and start keepalived",
+        "service": {
+          "name": "keepalived",
+          "state": "started",
+          "enabled": true
+        }
+      }
+    ]
+  }
+]

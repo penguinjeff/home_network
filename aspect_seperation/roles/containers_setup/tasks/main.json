@@ -1,0 +1,109 @@
+[
+  {
+    "name": "Ensure /opt/podman_updater exists",
+    "file": {
+      "path": "/opt/podman_updater",
+      "state": "directory",
+      "mode": "0755"
+    },
+    "when": "normal_containers is defined or ha_containers is defined"
+  },
+  {
+    "name": "Install update_podman_containers.sh",
+    "copy": {
+      "src": "../../files/podman_updater/update_podman_containers.sh",
+      "dest": "/opt/podman_updater/update_podman_containers.sh",
+      "mode": "0755"
+    },
+    "when": "normal_containers is defined or ha_containers is defined"
+  },
+  {
+    "name": "Install nightly update cron job",
+    "cron": {
+      "name": "Nightly Podman container update",
+      "user": "root",
+      "job": "/opt/podman_updater/update_podman_containers.sh",
+      "minute": "{{ update_time.split(':')[1] }}",
+      "hour": "{{ update_time.split(':')[0] }}",
+      "state": "present"
+    },
+    "when": "(normal_containers is defined or ha_containers is defined) and update_time is defined"
+  },
+  {
+    "name": "Install nightly container cleanup cron job",
+    "cron": {
+      "name": "Nightly container cleanup",
+      "user": "root",
+      "job": "/usr/bin/podman system prune -f",
+      "minute": "{{ cleanup_time.split(':')[1] }}",
+      "hour": "{{ cleanup_time.split(':')[0] }}",
+      "state": "present"
+    },
+    "when": "(normal_containers is defined or ha_containers is defined) and cleanup_time is defined"
+  },
+  {
+    "name": "Ensure normal-containers-enabled directory exists",
+    "file": {
+      "path": "/opt/podman_updater/normal-containers-enabled",
+      "state": "directory",
+      "mode": "0755"
+    },
+    "when": "normal_containers is defined or ha_containers is defined"
+  },
+  {
+    "name": "Ensure ha-containers-enabled directory exists",
+    "file": {
+      "path": "/opt/podman_updater/ha-containers-enabled",
+      "state": "directory",
+      "mode": "0755"
+    },
+    "when": "normal_containers is defined or ha_containers is defined"
+  },
+  {
+    "name": "Check normal container directories",
+    "stat": {
+      "path": "{{ container_location }}/{{ item }}"
+    },
+    "loop": "{{ normal_containers | default([]) }}",
+    "register": "normal_stats",
+    "when": "normal_containers is defined"
+  },
+  {
+    "name": "Link normal containers that exist",
+    "file": {
+      "src": "{{ container_location }}/{{ item.item }}",
+      "dest": "/opt/podman_updater/normal-containers-enabled/{{ item.item }}",
+      "state": "link"
+    },
+    "loop": "{{ normal_stats.results | default([]) }}",
+    "when": "item.stat.exists"
+  },
+  {
+    "name": "Check HA container directories",
+    "stat": {
+      "path": "{{ container_location }}/{{ item }}"
+    },
+    "loop": "{{ ha_containers | default([]) }}",
+    "register": "ha_stats",
+    "when": "ha_containers is defined"
+  },
+  {
+    "name": "Link HA containers that exist",
+    "file": {
+      "src": "{{ container_location }}/{{ item.item }}",
+      "dest": "/opt/podman_updater/ha-containers-enabled/{{ item.item }}",
+      "state": "link"
+    },
+    "loop": "{{ ha_stats.results | default([]) }}",
+    "when": "item.stat.exists"
+  },
+  {
+    "name": "Remove normal link if HA version exists",
+    "file": {
+      "path": "/opt/podman_updater/normal-containers-enabled/{{ item.item }}",
+      "state": "absent"
+    },
+    "loop": "{{ ha_stats.results | default([]) }}",
+    "when": "item.stat.exists"
+  }
+]

@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  home_web:
+    image: php:8.2-apache
+    container_name: home_web
+    network_mode: host
+    restart: always
+
+    volumes:
+      - /home/home_web/html:/var/www/html:ro

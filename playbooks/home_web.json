@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Deploy home_web container",
+    "hosts": "all",
+    "become": true,
+
+    "vars": {
+      "container_name": "home_web",
+      "ha": false,
+
+      "container_manager_containers": ["home_web"],
+
+      "container_dir": "{{ ansible_env.HOME }}/docker-compose-configs/home_web",
+      "container_enabled_dir": "{{ ansible_env.HOME }}/docker-compose-configs/containers-enabled",
+      "container_config_dir": "{{ ansible_env.HOME }}/docker-compose-configs/home_web",
+
+      "compose_src": "files/home_web/docker-compose.yml",
+      "containerfile_src": "files/home_web/Containerfile",
+
+      "container_update_script_enabled": true
+    },
+
+    "tasks": [
+      {
+        "name": "Load git_root (creates containers.hosts structure)",
+        "include_role": { "name": "git_root" }
+      },
+
+      {
+        "name": "Run container_links",
+        "when": "'home_web' in containers.hosts[inventory_hostname].normal_containers",
+        "include_role": { "name": "container_links" }
+      },
+
+      {
+        "name": "Run container_update_script",
+        "when": "'home_web' in containers.hosts[inventory_hostname].normal_containers",
+        "include_role": { "name": "container_update_script" }
+      },
+      {
+        "name": "Run container_deploy",
+        "when": "'home_web' in containers.hosts[inventory_hostname].normal_containers",
+        "include_role": { "name": "container_deploy" }
+      }
+    ]
+  }
+]
