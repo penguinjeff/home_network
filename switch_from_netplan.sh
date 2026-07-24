@@ -1,4 +1,4 @@
-#!/bin/bsh
+#!/bin/bash
 SSID=MYSSID
 WIFI_PASSWORD='A_G00d_W1f1_P4$$W0rd!'
 apt update
